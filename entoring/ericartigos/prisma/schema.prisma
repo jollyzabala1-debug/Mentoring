@@ -1,0 +1,151 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────
+
+model User {
+  id         String     @id @default(cuid())
+  name       String
+  email      String     @unique
+  password   String
+  role       Role
+  status     UserStatus @default(ACTIVE)
+  lastActive DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  updatedInventory InventoryItem[]
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  SUPERVISOR
+}
+
+enum UserStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// ─── Menu ────────────────────────────────────────────────
+
+model MenuCategory {
+  id        String     @id @default(cuid())
+  name      String
+  items     MenuItem[]
+  createdAt DateTime   @default(now())
+}
+
+model MenuItem {
+  id          String         @id @default(cuid())
+  name        String
+  description String?        @db.Text
+  price       Decimal        @db.Decimal(10, 2)
+  imageUrl    String?
+  categoryId  String
+  category    MenuCategory   @relation(fields: [categoryId], references: [id])
+  status      MenuItemStatus @default(ACTIVE)
+  ingredients MenuItemIngredient[]
+  orderItems  OrderItem[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+enum MenuItemStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model MenuItemIngredient {
+  id              String        @id @default(cuid())
+  menuItemId      String
+  menuItem        MenuItem      @relation(fields: [menuItemId], references: [id])
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Decimal       @db.Decimal(10, 3)
+  unit            String
+}
+
+// ─── Orders ──────────────────────────────────────────────
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement())
+  tableNumber String?
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2)
+  items       OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity   Int
+  unitPrice  Decimal  @db.Decimal(10, 2)
+  subtotal   Decimal  @db.Decimal(10, 2)
+}
+
+// ─── Inventory ───────────────────────────────────────────
+
+model InventoryCategory {
+  id    String          @id @default(cuid())
+  name  String
+  items InventoryItem[]
+}
+
+model InventoryItem {
+  id              String            @id @default(cuid())
+  name            String
+  categoryId      String
+  category        InventoryCategory @relation(fields: [categoryId], references: [id])
+  stock           Decimal           @db.Decimal(10, 3)
+  unit            String
+  supplier        String
+  expiryDate      DateTime?
+  status          StockStatus       @default(GOOD)
+  updatedById     String
+  updatedBy       User              @relation(fields: [updatedById], references: [id])
+  menuIngredients MenuItemIngredient[]
+  updatedAt       DateTime          @updatedAt
+  createdAt       DateTime          @default(now())
+}
+
+enum StockStatus {
+  GOOD
+  LOW
+  OUT_OF_STOCK
+}
+
+// ─── Daily Report Snapshots ──────────────────────────────
+
+model DailyReport {
+  id            String   @id @default(cuid())
+  date          DateTime @unique @db.Date
+  totalRevenue  Decimal  @db.Decimal(10, 2)
+  totalExpenses Decimal  @db.Decimal(10, 2)
+  netProfit     Decimal  @db.Decimal(10, 2)
+  totalOrders   Int
+  createdAt     DateTime @default(now())
+}
