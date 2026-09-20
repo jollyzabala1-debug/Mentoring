@@ -1,4 +1,5 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 
 export const config = {
   matcher: [
@@ -14,7 +15,7 @@ export const config = {
   ],
 };
 
-export default auth((req) => {
+export default NextAuth(authConfig).auth((req) => {
   const isLoggedIn = !!req.auth;
 
   // Protected routes: /dashboard/*

@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "./prisma";
+import { authConfig } from "./auth.config";
 
 // ─── Validation Schema ───────────────────────────────────
 
@@ -19,7 +20,12 @@ const signInSchema = z.object({
 // ─── NextAuth Configuration ─────────────────────────────
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
   providers: [
     Credentials({
       name: "Credentials",
@@ -70,38 +76,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           };
         } catch (error) {
           if (error instanceof z.ZodError) {
-            // Validation error
             return null;
           }
-          // Any other error (including invalid credentials)
           return null;
         }
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      // Add user role to JWT token when user signs in
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Add token data to session
-      if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as any).role = token.role;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 hours
-  },
 });
