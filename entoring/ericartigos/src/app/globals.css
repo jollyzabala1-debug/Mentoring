@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* ── Design Tokens ─────────────────────────────── */
+  --color-sidebar-bg:       hsl(220, 25%, 14%);
+  --color-sidebar-border:   hsl(220, 25%, 20%);
+  --color-sidebar-text:     hsl(215, 20%, 75%);
+  --color-sidebar-active:   hsl(217, 91%, 60%);
+
+  --color-accent:           hsl(217, 91%, 60%);
+  --color-success:          hsl(142, 76%, 36%);
+  --color-warning-orange:   hsl(25, 95%, 53%);
+  --color-danger:           hsl(0, 84%, 60%);
+  --color-warning-yellow:   hsl(48, 96%, 53%);
+  --color-admin-purple:     hsl(265, 83%, 80%);
+  --color-supervisor-purple:hsl(270, 60%, 75%);
+
+  --color-card-bg:          hsl(220, 25%, 18%);
+  --color-border:           hsl(220, 25%, 22%);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+}
+
+.dark {
+  --background: hsl(220, 25%, 10%);
+  --foreground: hsl(215, 20%, 92%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans, "Inter", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(220, 15%, 35%);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(220, 15%, 45%);
+}
+
+/* ── Animations ──────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.animate-fade-in    { animation: fadeIn 0.35s ease forwards; }
+.animate-slide-left { animation: slideInLeft 0.3s ease forwards; }
+.animate-pulse-soft { animation: pulse-soft 2s ease infinite; }
